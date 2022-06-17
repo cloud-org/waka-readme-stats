@@ -303,7 +303,8 @@ def generate_commit_list(tz):
         {"name": translate['Sunday'], "text": str(Sunday) + " commits", "percent": round((Sunday / sum_week) * 100, 2)},
     ]
 
-    string = string + '**' + title + '** \n\n' + '```text\n' + make_commit_list(one_day) + '\n\n```\n'
+    # 回撤最后一个 \n
+    string = string + '**' + title + '** \n\n' + '```text\n' + make_commit_list(one_day) + '\n```\n'
 
     if show_days_of_week.lower() in truthy:
         max_element = {
@@ -314,7 +315,8 @@ def generate_commit_list(tz):
             if day['percent'] > max_element['percent']:
                 max_element = day
         days_title = translate['I am Most Productive on'] % max_element['name']
-        string = string + '📅 **' + days_title + '** \n\n' + '```text\n' + make_commit_list(dayOfWeek) + '\n\n```\n'
+        # 回撤最后一个 \n
+        string = string + '📅 **' + days_title + '** \n\n' + '```text\n' + make_commit_list(dayOfWeek) + '\n```\n'
 
     return string
 
@@ -372,6 +374,9 @@ def get_waka_time_stats():
                     os_list = make_list(data['data']['operating_systems'])
                 stats = stats + '💻 ' + translate['operating system'] + ': \n' + os_list + '\n\n'
 
+            # 回撤 \n
+            stats = stats.removesuffix("\n") # 需要重新赋值
+            
             stats += '```\n\n'
 
     return stats
@@ -408,7 +413,8 @@ def generate_language_per_repo(result):
         })
 
     title = translate['I Mostly Code in'] % most_language_repo
-    return '**' + title + '** \n\n' + '```text\n' + make_list(data) + '\n\n```\n'
+    # 回撤最后一个 \n
+    return '**' + title + '** \n\n' + '```text\n' + make_list(data) + '\n```\n'
 
 
 def get_yearly_data():
@@ -446,22 +452,24 @@ def get_short_info(github):
         string += '> 🏆 ' + translate['Contributions in the year'] % (humanize.intcomma(total), year) + '\n > \n'
 
     string += '> 📦 ' + translate["Used in GitHub's Storage"] % disk_usage + ' \n > \n'
-    is_hireable = user_info.hireable
+    # is_hireable = user_info.hireable
     public_repo = user_info.public_repos
-    private_repo = user_info.owned_private_repos
-    if private_repo is None:
-        private_repo = 0
-    if is_hireable:
-        string += "> 💼 " + translate["Opted to Hire"] + "\n > \n"
-    else:
-        string += "> 🚫 " + translate["Not Opted to Hire"] + "\n > \n"
+    # private_repo = user_info.owned_private_repos
+    # if private_repo is None:
+    #     private_repo = 0
+    # if is_hireable:
+    #     string += "> 💼 " + translate["Opted to Hire"] + "\n > \n"
+    # else:
+    #     string += "> 🚫 " + translate["Not Opted to Hire"] + "\n > \n"
 
     string += '> 📜 '
     string += translate['public repositories'] % public_repo + " " + '\n > \n' if public_repo != 1 else translate[
                                                                                                             'public repository'] % public_repo + " " + '\n > \n'
-    string += '> 🔑 '
-    string += translate['private repositories'] % private_repo + " " + ' \n > \n' if private_repo != 1 else translate[
-                                                                                                                'private repository'] % private_repo + " " + '\n > \n'
+
+    # cancel private repositories                                                                                                       
+    # string += '> 🔑 '
+    # string += translate['private repositories'] % private_repo + " " + ' \n > \n' if private_repo != 1 else translate[
+    #                                                                                                             'private repository'] % private_repo + " " + '\n > \n'
 
     return string
 
@@ -514,9 +522,10 @@ def get_stats(github):
         stats = stats + '![Chart not found](https://raw.githubusercontent.com/' + username + '/' + username + '/' + branch_name + '/charts/bar_graph.png) \n\n'
 
     if show_updated_date.lower() in truthy:
-        now = datetime.datetime.utcnow()
+        shanghai = pytz.timezone('Asia/Shanghai') # todo: config input var
+        now = datetime.datetime.now(tz=shanghai)
         d1 = now.strftime(updated_date_format)
-        stats = stats + "\n Last Updated on " + d1 + " UTC"
+        stats = stats + "\n Last Updated on " + d1 + " UTC+08:00"
 
     return stats
 
